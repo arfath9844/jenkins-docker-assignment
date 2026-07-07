@@ -41,13 +41,19 @@ pipeline {
         }
 
         stage('Health Check') {
-            steps {
-                sh '''
-                sleep 10
-                curl --fail http://localhost:3000/health
-                '''
-            }
-        }
+    steps {
+        sh '''
+        sleep 10
+        node -e "
+        const http = require('http');
+        http.get('http://172.17.0.1:3000/health', (res) => {
+            if (res.statusCode !== 200) process.exit(1);
+            console.log('Health check passed');
+        }).on('error', () => process.exit(1));
+        "
+        '''
+    }
+}
 
         stage('Cleanup') {
             steps {

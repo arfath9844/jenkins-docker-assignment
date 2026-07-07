@@ -15,6 +15,12 @@ pipeline {
             }
         }
 
+        stage('Run Tests') {
+            steps {
+                sh 'npm test'
+            }
+        }
+
         stage('Build Docker Image') {
             steps {
                 sh 'docker build -t task-tracker-app .'
@@ -28,7 +34,7 @@ pipeline {
             }
         }
 
-        stage('Deploy') {
+        stage('Deploy Container') {
             steps {
                 sh 'docker run -d --name task-tracker-container -p 3000:3000 task-tracker-app'
             }
@@ -36,8 +42,10 @@ pipeline {
 
         stage('Health Check') {
             steps {
-                sh 'sleep 10'
-                sh 'curl http://localhost:3000/health'
+                sh '''
+                sleep 10
+                curl --fail http://localhost:3000/health
+                '''
             }
         }
 
@@ -52,11 +60,9 @@ pipeline {
         success {
             echo 'Pipeline executed successfully!'
         }
-
         failure {
-            echo 'Pipeline failed. Check the console output.'
+            echo 'Pipeline failed!'
         }
-
         always {
             echo 'Pipeline execution completed.'
         }

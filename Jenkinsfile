@@ -44,13 +44,7 @@ pipeline {
     steps {
         sh '''
         sleep 10
-        node -e "
-        const http = require('http');
-        http.get('http://172.17.0.1:3000/health', (res) => {
-            if (res.statusCode !== 200) process.exit(1);
-            console.log('Health check passed');
-        }).on('error', () => process.exit(1));
-        "
+        docker exec task-tracker-container curl --fail http://localhost:3000/health
         '''
     }
 }
